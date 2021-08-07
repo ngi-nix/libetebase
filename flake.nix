@@ -26,12 +26,18 @@
       # A Nixpkgs overlay.
       overlay = final: prev: {
 
-        hello = with final; stdenv.mkDerivation rec {
+        libetebase = with final; stdenv.mkDerivation rec {
           name = "libetebase-${version}";
 
           src = ./.;
 
+          cargoDeps = rustPlatform.fetchCargoTarball{
+            inherit src;
+            hash = "sha256-yBaKoCHgIFpskcixYaq4ZYfS14g9DyvT2DWUllhK3zY="; 
+          };
+          
           buildInputs = [ rustc cargo openssl libsodium ];
+
           nativeBuildInputs = [ pkg-config ];
 
         };
@@ -48,66 +54,6 @@
       # flake provides only one package or there is a clear "main"
       # package.
       defaultPackage = forAllSystems (system: self.packages.${system}.libetebase);
-
-      # A NixOS module, if applicable (e.g. if the package provides a system service).
-      #nixosModules.hello =
-        #{ pkgs, ... }:
-        #{
-          #nixpkgs.overlays = [ self.overlay ];
-#
-          #environment.systemPackages = [ pkgs.hello ];
-#
-          ##systemd.services = { ... };
-        #};
-
-      # Tests run by 'nix flake check' and by Hydra.
-      # checks = forAllSystems
-        # (system:
-          # with nixpkgsFor.${system};
-# 
-          # {
-            # inherit (self.packages.${system}) hello;
-# 
-            # # Additional tests, if applicable.
-            # test = stdenv.mkDerivation {
-              # name = "hello-test-${version}";
-# 
-              # buildInputs = [ hello ];
-# 
-              # unpackPhase = "true";
-# 
-              # buildPhase = ''
-                # echo 'running some integration tests'
-                # [[ $(hello) = 'Hello Nixers!' ]]
-              # '';
-# 
-              # installPhase = "mkdir -p $out";
-            # };
-          # }
-# 
-          # // lib.optionalAttrs stdenv.isLinux {
-            # # A VM test of the NixOS module.
-            # vmTest =
-              # with import (nixpkgs + "/nixos/lib/testing-python.nix") {
-                # inherit system;
-              # };
-# 
-              # makeTest {
-                # nodes = {
-                  # client = { ... }: {
-                    # imports = [ self.nixosModules.hello ];
-                  # };
-                # };
-# 
-                # testScript =
-                  # ''
-                    # start_all()
-                    # client.wait_for_unit("multi-user.target")
-                    # client.succeed("hello")
-                  # '';
-              # };
-          # }
-        # );
 
     };
 }
