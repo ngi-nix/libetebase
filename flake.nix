@@ -36,9 +36,17 @@
             hash = "sha256-yBaKoCHgIFpskcixYaq4ZYfS14g9DyvT2DWUllhK3zY="; 
           };
           
-          buildInputs = [ rustc cargo openssl libsodium ];
+          buildInputs = [ openssl ];
 
-          nativeBuildInputs = [ pkg-config ];
+          nativeBuildInputs = [
+            pkg-config
+          ] ++ (with rustPlatform; [
+            cargoSetupHook
+            rust.cargo
+            rust.rustc
+          ]);
+
+          installFlags = [ "PREFIX=$(out)" ];
 
         };
 
